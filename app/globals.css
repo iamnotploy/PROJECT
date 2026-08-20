@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_Rg.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_Bd.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_XBd.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LINE Seed Sans TH";
+  src: url("/fonts/LINESeedSansTH_W_He.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+}
+
+@theme inline {
+  --font-sans: "LINE Seed Sans TH", "Anuphan", "Noto Sans Thai", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #17211f;
+  --color-muted-ink: #66736f;
+  --color-canvas: #f8faf9;
+  --color-brand-50: #effbf7;
+  --color-brand-100: #d7f4eb;
+  --color-brand-200: #afe9d9;
+  --color-brand-300: #7bd7c3;
+  --color-brand-400: #46c2a9;
+  --color-brand-500: #21a98f;
+  --color-brand-600: #168875;
+  --color-brand-700: #126e61;
+  --color-brand-800: #11584f;
+  --color-brand-900: #104942;
+  --color-coral-50: #fff5f0;
+  --color-coral-500: #ef7754;
+  --color-coral-600: #df6041;
+  --color-gold-400: #f6c667;
+  --color-gold-500: #e7ae3e;
+}
+
+:root {
+  --shadow-soft: 0 14px 44px rgba(27, 66, 58, 0.08);
+  --shadow-card: 0 6px 24px rgba(27, 66, 58, 0.08);
+}
+
+* {
+  border-color: #e7eeeb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: #b9eddf;
+  color: #104942;
+}
+
+.surface-grid {
+  background-image: linear-gradient(rgba(22, 136, 117, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 136, 117, 0.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.hero-glow {
+  background: radial-gradient(circle at 76% 20%, rgba(125, 215, 195, 0.38), transparent 31%),
+    radial-gradient(circle at 12% 86%, rgba(246, 198, 103, 0.2), transparent 28%);
+}
+
+.image-shade {
+  background: linear-gradient(180deg, rgba(14, 43, 39, 0.02) 30%, rgba(14, 43, 39, 0.68) 100%);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(18px);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
