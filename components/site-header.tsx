@@ -23,6 +23,7 @@ export async function SiteHeader({ dark = false, transparent = false }: { dark?:
           <Link className="transition hover:text-brand-700" href="/rooms">ที่พักทั้งหมด</Link>
           <Link className="transition hover:text-brand-700" href="/#areas">สำรวจมุกดาหาร</Link>
           {canManageHotel && <Link className="transition hover:text-brand-700" href="/dashboard">จัดการโรงแรม</Link>}
+          {profile?.role === "customer" && <Link className="transition hover:text-brand-700" href="/manager/apply">สมัครเป็นผู้จัดการ</Link>}
           <Link className="flex items-center gap-1 transition hover:text-brand-700" href="#">ช่วยเหลือ <ChevronDown className="size-3.5" /></Link>
         </nav>
         <div className="flex items-center gap-2">

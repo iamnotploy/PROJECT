@@ -112,7 +112,10 @@ create policy "public can view available rooms" on public.rooms for select using
 create policy "users can view own profile" on public.profiles for select using (id = auth.uid() or public.current_user_role() in ('manager', 'admin'));
 create policy "users can update own profile" on public.profiles for update using (id = auth.uid()) with check (id = auth.uid());
 create policy "customers view own bookings" on public.bookings for select using (user_id = auth.uid() or public.current_user_role() in ('receptionist', 'manager', 'admin'));
-create policy "customers create bookings" on public.bookings for insert with check (user_id = auth.uid() or auth.uid() is null);
+create policy "customers create bookings" on public.bookings
+for insert
+to authenticated
+with check (user_id = (select auth.uid()) and public.current_user_role() = 'customer');
 create policy "staff update bookings" on public.bookings for update using (public.current_user_role() in ('receptionist', 'manager', 'admin')) with check (public.current_user_role() in ('receptionist', 'manager', 'admin'));
 create policy "managers manage rooms" on public.rooms for all using (public.current_user_role() in ('manager', 'admin')) with check (public.current_user_role() in ('manager', 'admin'));
 create policy "managers manage room types" on public.room_types for all using (public.current_user_role() in ('manager', 'admin')) with check (public.current_user_role() in ('manager', 'admin'));

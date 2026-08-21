@@ -21,6 +21,12 @@ with check (
   and (id <> auth.uid() or role = 'admin')
 );
 
+drop policy if exists "customers create bookings" on public.bookings;
+create policy "customers create bookings" on public.bookings
+for insert
+to authenticated
+with check (user_id = (select auth.uid()) and public.current_user_role() = 'customer');
+
 create or replace function public.prevent_admin_self_role_change()
 returns trigger
 language plpgsql
