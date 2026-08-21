@@ -11,23 +11,38 @@ function displayDate(value: string) {
   return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short" }).format(new Date(`${value}T00:00:00`));
 }
 
-export function SearchPanel({ compact = false }: { compact?: boolean }) {
+export type SearchPanelValues = {
+  hotelId?: string;
+  destination?: string;
+  checkIn?: string;
+  checkOut?: string;
+  guests?: string | number;
+  rooms?: string | number;
+};
+
+export function SearchPanel({ compact = false, initialValues }: { compact?: boolean; initialValues?: SearchPanelValues }) {
   const router = useRouter();
-  const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState("2026-08-21");
-  const [checkOut, setCheckOut] = useState("2026-08-23");
-  const [guests, setGuests] = useState(2);
-  const [roomCount, setRoomCount] = useState(1);
+  const [destination, setDestination] = useState(initialValues?.destination ?? "");
+  const [checkIn, setCheckIn] = useState(initialValues?.checkIn ?? "2026-08-21");
+  const [checkOut, setCheckOut] = useState(initialValues?.checkOut ?? "2026-08-23");
+  const [guests, setGuests] = useState(Number(initialValues?.guests ?? 2));
+  const [roomCount, setRoomCount] = useState(Number(initialValues?.rooms ?? 1));
   const [guestOpen, setGuestOpen] = useState(false);
   const [stayMode, setStayMode] = useState<"overnight" | "day">("overnight");
+  const [searchError, setSearchError] = useState("");
 
   function submitSearch() {
-    const query = new URLSearchParams({ destination: destination || "มุกดาหาร", checkIn, checkOut, guests: String(guests), rooms: String(roomCount) });
+    if (!checkIn || !checkOut || checkOut <= checkIn) {
+      setSearchError("กรุณาเลือกวันเช็กเอาต์ให้หลังวันเช็กอิน");
+      return;
+    }
+    setSearchError("");
+    const query = new URLSearchParams({ ...(initialValues?.hotelId ? { hotel: initialValues.hotelId } : {}), destination: destination || "มุกดาหาร", checkIn, checkOut, guests: String(guests), rooms: String(roomCount) });
     router.push(`/rooms?${query.toString()}`);
   }
 
   if (compact) {
-    return <CompactSearchPanel destination={destination} setDestination={setDestination} checkIn={checkIn} setCheckIn={setCheckIn} checkOut={checkOut} setCheckOut={setCheckOut} guests={guests} roomCount={roomCount} guestOpen={guestOpen} setGuestOpen={setGuestOpen} setGuests={setGuests} setRoomCount={setRoomCount} submitSearch={submitSearch} />;
+    return <CompactSearchPanel destination={destination} setDestination={setDestination} checkIn={checkIn} setCheckIn={setCheckIn} checkOut={checkOut} setCheckOut={setCheckOut} guests={guests} roomCount={roomCount} guestOpen={guestOpen} setGuestOpen={setGuestOpen} setGuests={setGuests} setRoomCount={setRoomCount} submitSearch={submitSearch} searchError={searchError} />;
   }
 
   return (
@@ -60,6 +75,7 @@ export function SearchPanel({ compact = false }: { compact?: boolean }) {
             <label className="flex items-center gap-2 text-muted-ink"><input type="checkbox" className="size-4 accent-brand-600" /> แสดงที่พักแบบบ้านพักและอพาร์ตเมนต์เท่านั้น</label>
             <button type="button" className="flex items-center gap-2 font-bold text-brand-700 hover:text-brand-900"><span className="text-lg leading-none">＋</span> เพิ่มตัวเลือกการค้นหา</button>
           </div>
+          {searchError && <p className="mt-4 text-center text-xs font-semibold text-coral-600">{searchError}</p>}
           <Button onClick={submitSearch} size="lg" className="mx-auto mt-5 flex w-full max-w-[320px] rounded-full"><Search className="size-4" /> ค้นหาที่พัก</Button>
         </div>
       </div>
@@ -76,8 +92,8 @@ function DateField({ label, value, onChange }: { label: string; value: string; o
   return <label className="flex min-h-[72px] cursor-pointer items-center gap-3 rounded-2xl border bg-white px-4 transition hover:border-brand-300 focus-within:border-brand-500 focus-within:ring-4 focus-within:ring-brand-100"><CalendarDays className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">{label}</span><input type="date" value={value} onChange={(event) => onChange(event.target.value)} className="w-full bg-transparent text-sm font-bold text-ink outline-none" aria-label={`วัน${label}`} /></span></label>;
 }
 
-function CompactSearchPanel({ destination, setDestination, checkIn, setCheckIn, checkOut, setCheckOut, guests, roomCount, guestOpen, setGuestOpen, setGuests, setRoomCount, submitSearch }: { destination: string; setDestination: (value: string) => void; checkIn: string; setCheckIn: (value: string) => void; checkOut: string; setCheckOut: (value: string) => void; guests: number; roomCount: number; guestOpen: boolean; setGuestOpen: (value: boolean) => void; setGuests: (value: number) => void; setRoomCount: (value: number) => void; submitSearch: () => void }) {
-  return <div className="rounded-[24px] border border-white/80 bg-white p-2 shadow-[0_20px_50px_rgba(13,64,61,0.16)]"><div className="grid gap-1 lg:grid-cols-[1.35fr_1fr_1fr_1.05fr_auto]"><label className="group flex min-h-[68px] cursor-text items-center gap-3 rounded-2xl px-4 transition hover:bg-brand-50"><MapPin className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">จุดหมายปลายทาง</span><input value={destination} onChange={(event) => setDestination(event.target.value)} className="w-full bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-muted-ink" placeholder="เมืองหรือโรงแรม" aria-label="จุดหมายปลายทาง" /></span></label><label className="group flex min-h-[68px] cursor-pointer items-center gap-3 rounded-2xl px-4 transition hover:bg-brand-50"><CalendarDays className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">เช็กอิน</span><input type="date" value={checkIn} onChange={(event) => setCheckIn(event.target.value)} className="w-full bg-transparent text-sm font-semibold text-ink outline-none" aria-label="วันเช็กอิน" /></span></label><label className="group flex min-h-[68px] cursor-pointer items-center gap-3 rounded-2xl px-4 transition hover:bg-brand-50"><CalendarDays className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">เช็กเอาต์</span><input type="date" value={checkOut} onChange={(event) => setCheckOut(event.target.value)} className="w-full bg-transparent text-sm font-semibold text-ink outline-none" aria-label="วันเช็กเอาต์" /></span></label><div className="relative flex min-h-[68px] items-center"><button type="button" onClick={() => setGuestOpen(!guestOpen)} className="flex w-full items-center gap-3 rounded-2xl px-4 text-left transition hover:bg-brand-50" aria-expanded={guestOpen}><Users className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">ผู้เข้าพัก</span><span className="truncate text-sm font-semibold">{guests} ผู้เข้าพัก · {roomCount} ห้อง</span></span><ChevronDown className={cn("size-4 text-muted-ink transition", guestOpen && "rotate-180")} /></button>{guestOpen && <GuestPopover guests={guests} roomCount={roomCount} setGuests={setGuests} setRoomCount={setRoomCount} onDone={() => setGuestOpen(false)} />}</div><Button onClick={submitSearch} size="lg" className="m-1 min-h-[60px] rounded-2xl"><Search className="size-5" /><span className="lg:hidden xl:inline">ค้นหาที่พัก</span></Button></div><div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 pb-2 pt-1 text-[11px] text-muted-ink"><span>เช็กอิน {displayDate(checkIn)}</span><span>เช็กเอาต์ {displayDate(checkOut)}</span></div></div>;
+function CompactSearchPanel({ destination, setDestination, checkIn, setCheckIn, checkOut, setCheckOut, guests, roomCount, guestOpen, setGuestOpen, setGuests, setRoomCount, submitSearch, searchError }: { destination: string; setDestination: (value: string) => void; checkIn: string; setCheckIn: (value: string) => void; checkOut: string; setCheckOut: (value: string) => void; guests: number; roomCount: number; guestOpen: boolean; setGuestOpen: (value: boolean) => void; setGuests: (value: number) => void; setRoomCount: (value: number) => void; submitSearch: () => void; searchError: string }) {
+  return <div className="rounded-[24px] border border-white/80 bg-white p-2 shadow-[0_20px_50px_rgba(13,64,61,0.16)]"><div className="grid gap-1 lg:grid-cols-[1.35fr_1fr_1fr_1.05fr_auto]"><label className="group flex min-h-[68px] cursor-text items-center gap-3 rounded-2xl px-4 transition hover:bg-brand-50"><MapPin className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">จุดหมายปลายทาง</span><input value={destination} onChange={(event) => setDestination(event.target.value)} className="w-full bg-transparent text-sm font-semibold text-ink outline-none placeholder:text-muted-ink" placeholder="เมืองหรือโรงแรม" aria-label="จุดหมายปลายทาง" /></span></label><label className="group flex min-h-[68px] cursor-pointer items-center gap-3 rounded-2xl px-4 transition hover:bg-brand-50"><CalendarDays className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">เช็กอิน</span><input type="date" value={checkIn} onChange={(event) => setCheckIn(event.target.value)} className="w-full bg-transparent text-sm font-semibold text-ink outline-none" aria-label="วันเช็กอิน" /></span></label><label className="group flex min-h-[68px] cursor-pointer items-center gap-3 rounded-2xl px-4 transition hover:bg-brand-50"><CalendarDays className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">เช็กเอาต์</span><input type="date" value={checkOut} onChange={(event) => setCheckOut(event.target.value)} className="w-full bg-transparent text-sm font-semibold text-ink outline-none" aria-label="วันเช็กเอาต์" /></span></label><div className="relative flex min-h-[68px] items-center"><button type="button" onClick={() => setGuestOpen(!guestOpen)} className="flex w-full items-center gap-3 rounded-2xl px-4 text-left transition hover:bg-brand-50" aria-expanded={guestOpen}><Users className="size-5 shrink-0 text-brand-600" /><span className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-[11px] font-bold uppercase tracking-wider text-muted-ink">ผู้เข้าพัก</span><span className="truncate text-sm font-semibold">{guests} ผู้เข้าพัก · {roomCount} ห้อง</span></span><ChevronDown className={cn("size-4 text-muted-ink transition", guestOpen && "rotate-180")} /></button>{guestOpen && <GuestPopover guests={guests} roomCount={roomCount} setGuests={setGuests} setRoomCount={setRoomCount} onDone={() => setGuestOpen(false)} />}</div><Button onClick={submitSearch} size="lg" className="m-1 min-h-[60px] rounded-2xl"><Search className="size-5" /><span className="lg:hidden xl:inline">ค้นหาที่พัก</span></Button></div><div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 pb-2 pt-1 text-[11px] text-muted-ink"><span>เช็กอิน {displayDate(checkIn)}</span><span>เช็กเอาต์ {displayDate(checkOut)}</span>{searchError && <span className="font-semibold text-coral-600">{searchError}</span>}</div></div>;
 }
 
 function GuestPopover({ guests, roomCount, setGuests, setRoomCount, onDone }: { guests: number; roomCount: number; setGuests: (value: number) => void; setRoomCount: (value: number) => void; onDone: () => void }) {
